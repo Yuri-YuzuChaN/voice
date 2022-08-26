@@ -118,7 +118,7 @@ async def voice(bot: NoneBot, ev: CQEvent):
                         index = n
                         id = i[preid]
                         break
-                voice = await hfapi(index, [text, id])
+                voice = await hfapi(index, [text, id, 1])
         data = MessageSegment.record(voice)
     except Error as e:
         data = f'发生错误：{e.error}'
@@ -136,9 +136,8 @@ async def voicehelp(bot: NoneBot, ev: CQEvent):
         return
     if args == '日文' or args == '译文' or args == '日语':
         data = [z for i in [model1, model2, model3, model4] for z in i.keys()]
-        if args == '日语':
-            for i in XCW:
-                data.append(i)
+        for i in XCW:
+            data.append(i)
     elif args == '中文':
         data = CN
     elif args == '韩语':
