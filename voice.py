@@ -104,7 +104,7 @@ async def voice(bot: NoneBot, ev: CQEvent):
         preid: str = ev.prefix[:-3]
         prelang: str = ev.prefix[-2:]
         if prelang == '中文':
-            voice = await voiceApi(GenshinAPI, {'speaker': preid, 'text': text})
+            voice = await voiceApi(GenshinAPI, {'speaker': preid, 'text': text, 'length': 1.0})
         elif prelang == '韩语':
             lang = 'speakkr'
             id = KR[preid]
@@ -137,7 +137,7 @@ async def voicehelp(bot: NoneBot, ev: CQEvent):
     if not args:
         return
     if args == '日文' or args == '译文' or args == '日语':
-        data = [z for i in [model1, model2, model3, model4] for z in i.keys()]
+        data = [z for i in HFList for z in i.keys()]
         for i in XCW:
             data.append(i)
     elif args == '中文':
