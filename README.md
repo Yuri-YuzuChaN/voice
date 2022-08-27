@@ -12,7 +12,7 @@
 3. 在 `config/__bot__.py` 模块列表中添加 `voice`
 4. 重启HoshinoBot
 
-**请务必将 `nonebot` 和 `aiocqhttp` 依赖更新至最新版本
+**请务必将 `nonebot` 和 `aiocqhttp` 依赖更新至最新版本**
 
 ## 指令说明
 
