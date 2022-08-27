@@ -4,12 +4,13 @@ from hoshino.typing import CQEvent
 from typing import Union
 
 import aiohttp, base64, time, random, hashlib, json, websockets
+from PIL import Image, ImageDraw, ImageFont
+import os
 
 help = '''[角色]说[语言] [文本]：合成自定义语言
 例如：宁宁说日文 はじめまして
 [语言]语言帮助：查看可用角色
 例如：中文语言帮助
-
 语言分类：
 - 译文：输入中文自动翻译成日语
 - 日语：纯日语，尽量输入假名
@@ -132,22 +133,67 @@ async def voice(bot: NoneBot, ev: CQEvent):
 
     await bot.send(ev, data)
 
-@sv.on_suffix('语言帮助')
+@sv.on_suffix(('语言帮助','语音帮助'))
 async def voicehelp(bot: NoneBot, ev: CQEvent):
-    args = ev.message.extract_plain_text().strip()
-    if not args:
-        return
-    if args == '日文' or args == '译文' or args == '日语':
-        data = [z for i in HFList for z in i.keys()]
-        for i in XCW:
-            data.append(i)
-    elif args == '中文':
-        data = CN
-    elif args == '韩语':
-        data = [i for i in KR.keys()]
-    else:
-        return
-    await bot.send(ev, '可使用的角色名：\n' + '|'.join(data))
+    datacn = CN
+    datajp = [z for i in [model1, model2, model3, model4] for z in i.keys()]
+    for i in XCW:
+       datajp.append(i)
+    datakr = [i for i in KR.keys()]
+    image = Image.open(os.path.join(os.path.dirname(__file__),f"help.jpg"))
+    #image.show()
+    draw= ImageDraw.Draw(image) #建立一个绘图的对象
+    font = ImageFont.truetype(os.path.join(os.path.dirname(__file__),f"SourceHanSansSC-Regular.otf"), 40)
+    text=''                      #cn部分，生成文本，换行
+    textcn=''
+    for prime in datacn:
+        text3=text
+        text+=prime+" " 
+        if len(text)>30:
+           if len(text)<33:
+              textcn+=text+'\n'
+              text=''
+           else:
+              textcn+=text3+'\n'
+              text=''
+              text+=prime+" "
+    textcn+=text+'\n'    
+    text=''                     #jp部分，生成文本，换行
+    textjp='' 
+    for prime in datajp:
+        text3=text
+        text+=prime+" " 
+        if len(text)>30:
+           if len(text)<33:
+              textjp+=text+'\n'
+              text=''
+           else:
+              textjp+=text3+'\n'
+              text=''
+              text+=prime+" "
+    textjp+=text+'\n' 
+    print(textjp)    
+    text=''                     #kr部分，生成文本，换行
+    textkr='' 
+    for prime in datakr:
+        text3=text
+        text+=prime+" " 
+        if len(text)>30:
+           if len(text)<33:
+              textkr+=text+'\n'
+              text=''
+           else:
+              textkr+=text3+'\n'
+              text=''
+              text+=prime+" "
+    textkr+=text+'\n'   
+    print(textkr)   
+    draw.text((120,1155), textcn, font=font, fill="gray") 
+    draw.text((120,1728), textjp, font=font, fill="gray")
+    draw.text((120,2255), textkr, font=font, fill="gray")    
+    image.save(os.path.join(os.path.dirname(__file__),f"help2.jpg"))
+    help2=os.path.join(os.path.dirname(__file__),f"help2.jpg")
+    await bot.send(ev, MessageSegment.image(f'file:///{help2}'))
 
 async def translate(text: str) -> str:
     lts = str(int(time.time() * 1000))
