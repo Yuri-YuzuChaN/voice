@@ -3,7 +3,7 @@ from hoshino import Service, priv
 from hoshino.typing import CQEvent
 from typing import Union
 
-import aiohttp, base64, time, random, hashlib, json
+import aiohttp, base64, time, random, hashlib, json, websockets
 
 help = '''[角色]说[语言] [文本]：合成自定义语言
 例如：宁宁说日文 はじめまして
@@ -38,7 +38,7 @@ HFList = [model1, model2, model3, model4, model5]
 ALLJP2 = {z: i[z] for i in HFList for z in i.keys()}
 
 MoeGoeAPI = 'https://moegoe.azurewebsites.net/api/'
-HFAPI = 'https://hf.space/embed/skytnt/moe-japanese-tts/api/queue/'
+HFAPI = 'wss://spaces.huggingface.tech/skytnt/moe-japanese-tts/queue/join'
 GenshinAPI = 'http://233366.proxy.nscc-gz.cn:8888'
 XcwAPI = 'http://prts.tencentbot.top/0/'
 TranslateAPI = 'https://fanyi.youdao.com/translate_o?smartresult=dict&smartresult=rule'
@@ -56,31 +56,32 @@ def randomhash():
     return hash
 
 async def hfapi(index: int, voicedata: list) -> str:
-    async def POST(project: str, json: list) -> dict:
-        async with aiohttp.request('POST', HFAPI + project + '/', json=json) as resp:
-            if resp.status == 200:
-                data = await resp.json()
-            else:
-                raise Error(resp.status)
-        return data
-    
+    hash = json.dumps({'hash': randomhash()})
     voicejson = {
         'fn_index': index,
-        'data': voicedata,
-        'action': 'predict',
-        'session_hash': randomhash()
+        'data': voicedata
     }
-    data = await POST('push', voicejson)
-
-    voicejson = {'hash': data['hash']}
-    while True:
-        data: dict[str, Union[str, dict[str, str]]] = await POST('status', voicejson)
-        if data['status'] == 'COMPLETE':
-            b64 = data['data']['data'][1].split(',')[1]
-            return 'base64://' + b64
-        elif data['status'] == 'FAILED':
-            error = json.loads(data['data'])
-            raise Error(error['error'])
+    async with websockets.connect(HFAPI) as ws:
+        await ws.send(hash)
+        while True:
+            if ws.closed:
+                return
+            data = json.loads(await ws.recv())
+            if data['msg'] == 'estimation':
+                continue
+            elif data['msg'] == 'send_data':
+                await ws.send(json.dumps(voicejson))
+                while True:
+                    data = json.loads(await ws.recv())
+                    if data['msg'] == 'process_starts':
+                        continue
+                    elif data['msg'] == 'process_completed':
+                        b64 = data['output']['data'][1].split(',')[1]
+                        return 'base64://' + b64
+                    else:
+                        raise Error('HFAPI请求错误')
+            else:
+                raise Error('HFAPI请求错误')  
 
 async def voiceApi(api: str, params: Union[str, dict] = None) -> str:
     async with aiohttp.request('GET', api, params=params) as resp:
@@ -147,7 +148,6 @@ async def voicehelp(bot: NoneBot, ev: CQEvent):
     else:
         return
     await bot.send(ev, '可使用的角色名：\n' + '|'.join(data))
-
 
 async def translate(text: str) -> str:
     lts = str(int(time.time() * 1000))

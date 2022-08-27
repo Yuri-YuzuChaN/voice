@@ -8,7 +8,7 @@
 ## 使用方法
 
 1. 将该项目放在HoshinoBot插件目录 `modules` 下，或者clone本项目 `git clone https://github.com/Yuri-YuzuChaN/voice`
-2. pip以下依赖：`aiohttp`
+2. pip以下依赖：`aiohttp`, `websockets`
 3. 在 `config/__bot__.py` 模块列表中添加 `voice`
 4. 重启HoshinoBot
 
@@ -36,8 +36,9 @@
 
 **2022-08-28**
 
-1. 新增《美少女万花镜》
-2. 修改中文语速
+1. API从HTTP更改为WS
+2. 新增《美少女万花镜》
+3. 修改中文语速
 
 **2022-08-26**
 
