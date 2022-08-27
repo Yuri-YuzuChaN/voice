@@ -31,9 +31,11 @@ model1 = {'宁宁': '綾地寧々', '爱瑠': '因幡めぐる', '芳乃': '朝�
 model2 = {'姬爱': '和泉妃愛', '华乃': '常盤華乃', '日海': '錦あすみ', '诗音': '鎌倉詩桜', '天梨': '竜閑天梨', '和泉里': '和泉里', '广梦': '新川広夢', '莉莉子': '聖莉々子'}
 model3 = {'夏目': '四季ナツメ', '栞那': '明月栞那', '希': '墨染希', '爱衣': '火打谷愛衣', '凉音': '汐山涼音'}
 model4 = {'穹': '春日野穹', '瑛': '天女目瑛', '奈绪': '依媛奈緒', '一叶': '渚一葉'}
+model5 = {'莲华': '蓮華', '雾枝': '篝ノ霧枝', '雫': '沢渡雫', '灯露椎': '灯露椎', '夕莉': '覡夕莉'}
 
 # ALLJP = {z: i[z] for i in [JP, JP2] for z in i.keys()}
-ALLJP2 = {z: i[z] for i in [model1, model2, model3, model4] for z in i.keys()}
+HFList = [model1, model2, model3, model4, model5]
+ALLJP2 = {z: i[z] for i in HFList for z in i.keys()}
 
 MoeGoeAPI = 'https://moegoe.azurewebsites.net/api/'
 HFAPI = 'https://hf.space/embed/skytnt/moe-japanese-tts/api/queue/'
@@ -113,7 +115,7 @@ async def voice(bot: NoneBot, ev: CQEvent):
             if preid in XCW:
                 voice = await voiceApi(XcwAPI + text)
             else:
-                for n, i in enumerate([model1, model2, model3, model4]):
+                for n, i in enumerate(HFList):
                     if preid in i:
                         index = n
                         id = i[preid]
