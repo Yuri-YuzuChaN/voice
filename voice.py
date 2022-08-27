@@ -136,7 +136,7 @@ async def voice(bot: NoneBot, ev: CQEvent):
 @sv.on_suffix(('语言帮助','语音帮助'))
 async def voicehelp(bot: NoneBot, ev: CQEvent):
     datacn = CN
-    datajp = [z for i in [model1, model2, model3, model4] for z in i.keys()]
+    datajp = [z for i in [model1, model2, model3, model4, model5] for z in i.keys()]
     for i in XCW:
        datajp.append(i)
     datakr = [i for i in KR.keys()]
