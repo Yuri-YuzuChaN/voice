@@ -56,32 +56,31 @@ def randomhash():
     return hash
 
 async def hfapi(index: int, voicedata: list) -> str:
-    hash = json.dumps({'hash': randomhash()})
+    async def POST(project: str, json: list) -> dict:
+        async with aiohttp.request('POST', HFAPI + project + '/', json=json) as resp:
+            if resp.status == 200:
+                data = await resp.json()
+            else:
+                raise Error(resp.status)
+        return data
+
     voicejson = {
         'fn_index': index,
-        'data': voicedata
+        'data': voicedata,
+        'action': 'predict',
+        'session_hash': randomhash()
     }
-    async with websockets.connect(HFAPI) as ws:
-        await ws.send(hash)
-        while True:
-            if ws.closed:
-                return
-            data = json.loads(await ws.recv())
-            if data['msg'] == 'estimation':
-                continue
-            elif data['msg'] == 'send_data':
-                await ws.send(json.dumps(voicejson))
-                while True:
-                    data = json.loads(await ws.recv())
-                    if data['msg'] == 'process_starts':
-                        continue
-                    elif data['msg'] == 'process_completed':
-                        b64 = data['output']['data'][1].split(',')[1]
-                        return 'base64://' + b64
-                    else:
-                        raise Error('HFAPI请求错误')
-            else:
-                raise Error('HFAPI请求错误')  
+    data = await POST('push', voicejson)
+
+    voicejson = {'hash': data['hash']}
+    while True:
+        data: dict[str, Union[str, dict[str, str]]] = await POST('status', voicejson)
+        if data['status'] == 'COMPLETE':
+            b64 = data['data']['data'][1].split(',')[1]
+            return 'base64://' + b64
+        elif data['status'] == 'FAILED':
+            error = json.loads(data['data'])
+            raise Error(error['error'])
 
 async def voiceApi(api: str, params: Union[str, dict] = None) -> str:
     async with aiohttp.request('GET', api, params=params) as resp:
