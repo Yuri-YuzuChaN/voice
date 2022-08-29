@@ -38,7 +38,7 @@ HFList = [model1, model2, model3, model4, model5]
 ALLJP2 = {z: i[z] for i in HFList for z in i.keys()}
 
 MoeGoeAPI = 'https://moegoe.azurewebsites.net/api/'
-HFAPI = 'wss://spaces.huggingface.tech/skytnt/moe-japanese-tts/queue/join'
+HFAPI = 'https://hf.space/embed/skytnt/moe-japanese-tts/api/queue/'
 GenshinAPI = 'http://233366.proxy.nscc-gz.cn:8888'
 XcwAPI = 'http://prts.tencentbot.top/0/'
 TranslateAPI = 'https://fanyi.youdao.com/translate_o?smartresult=dict&smartresult=rule'
@@ -115,12 +115,16 @@ async def voice(bot: NoneBot, ev: CQEvent):
             if preid in XCW:
                 voice = await voiceApi(XcwAPI + text)
             else:
-                for n, i in enumerate(HFList):
+                n = 1
+                for i in HFList:
+                # for n, i in enumerate(HFList):
                     if preid in i:
                         index = n
                         id = i[preid]
                         break
-                voice = await hfapi(index, [text, id, 1])
+                    else:
+                        n += 3
+                voice = await hfapi(index, [text, id, 1, False])
         data = MessageSegment.record(voice)
     except Error as e:
         data = f'发生错误：{e.error}'
