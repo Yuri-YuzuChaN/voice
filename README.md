@@ -1,13 +1,9 @@
-## 由于HF的API防爬每天都会更换，作为插件而言修改的成本很高。目前Hoshino群已有使用本地模型制作语音的插件，需要高配置的主机或服务器。该插件目前仅日语角色 `小仓唯` 和 `中文` 可用
-
---- 
-
 # voice
 基于HoshinoBot V2的合成语音插件
 
 项目地址：https://github.com/Yuri-YuzuChaN/voice
 
-如果对该项目的语音训练有兴趣，可以查看项目 [MoeGoe](https://github.com/CjangCjengh/MoeGoe) 和 [Hugging Face](https://huggingface.co/spaces/skytnt/moe-japanese-tts)
+如果对该项目的语音训练有兴趣，可以查看项目 [MoeGoe](https://github.com/CjangCjengh/MoeGoe)
 
 ## 使用方法
 
@@ -37,6 +33,11 @@
 - 中文：纯中文语音
 
 ## 更新说明
+
+**2022-10-14**
+
+1. 弃用HFAPI
+2. 新增 `ToLove` 和 `DRACU-RIOT` 角色语音
 
 **2022-08-29**
 
